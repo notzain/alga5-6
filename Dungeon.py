@@ -1,12 +1,19 @@
 from Room import Room
 from Hallway import Hallway
+from collections import deque
+from random import randint
 
 class Dungeon:
     def __init__(self):
         self.rooms = []
         self.hallways = []
+        self.width = 0
+        self.height = 0
 
-    def generate(self, width, height):
+    def generateRooms(self, width, height):
+        self.width = width
+        self.height = height
+
         for y in range(height):
             for x in range(width):
                 self.rooms.append(Room(x, y))
@@ -61,21 +68,40 @@ class Dungeon:
                         [adjacent]
                     )
 
+    def getRoom(self, x, y):
+        return next(room
+            for room in self.rooms if room.x == x and room.y == y)
 
-        
+    def generateExits(self):
+        startx, starty = randint(0, self.width - 1), randint(0, self.height - 1)
+        endx, endy = randint(0, self.width - 1), randint(0, self.height - 1)
 
-    def bfs(self, startRoom):
-        visited = set()
-        queue = [startRoom]
+        startRoom = next(room
+            for room in self.rooms if room.x == startx and room.y == starty)
+
+        endRoom = next(room
+            for room in self.rooms if room.x == endx and room.y == endy)
+
+        return (startRoom, endRoom)
+
+
+    def bfs(self, startRoom, endRoom):
+        visited = {startRoom: None}
+        queue = deque([startRoom])
 
         while queue:
-            room = queue.pop()
-            visited.add(room)
-            room.isRoute = True
+            room = queue.popleft()
+            if room == endRoom:
+                path = []
+                while room is not None:
+                    path.append(room)
+                    room = visited[room]
+                return path[::-1]
 
             for adjacent in room.adjacentRooms:
-                if not adjacent in visited and not adjacent in queue:
+                if not adjacent in visited:
+                    visited[adjacent] = room
                     queue.append(adjacent)
 
-        return visited
+        return None
     

@@ -13,31 +13,19 @@ red = (255, 0, 0)
 green = (0, 255, 0)
 blue = (0, 0, 255)
 
-
 gameDisplay = pygame.display.set_mode((800, 800))
 gameDisplay.fill(black)
 
+room_width = None
+room_height = None
+room_size = None
+margin = None
 
-if __name__ == '__main__':
-    dungeon = Dungeon()
+currentRoom = None
+startRoom = None
+endRoom = None
 
-    rooms_x = int(input("Room width: "))
-    rooms_y = int(input("Room height: "))
-
-    margin = rooms_x * 10
-    room_width = (800 / rooms_x) - (margin)
-    room_height = (800 / rooms_y) - (margin)
-    room_size = min([200, room_width, room_height])
-
-    dungeon.generate(rooms_x, rooms_y)
-
-    dungeon.rooms[0].isStart = True
-    dungeon.rooms[-1].isEnd = True
-
-    print(dungeon.rooms[2])
-    dungeon.bfs(dungeon.rooms[2])
-
-    print(len(dungeon.hallways))
+def render(dungeon):
     for hallway in dungeon.hallways:
         start_left = hallway.start.x * (room_width + margin) + margin/2
         start_top = hallway.start.y * (room_height + margin) + margin/2
@@ -67,23 +55,74 @@ if __name__ == '__main__':
 
     for room in dungeon.rooms:
         color = None
-        if room.isVisited:
+        if room.isPlayer:
             color = red
         elif room.isEnd:
             color = green
         elif room.isStart:
             color = blue
-        elif room.isRoute:
-            color = red
         else:
             color = white
 
-        #pygame.draw.rect(gameDisplay, color, 
-        #    (room.x * (room_width + margin) + margin/2,
-        #     room.y * (room_height + margin) + margin/2,
-        #     room_size,
-        #     room_size))
+        pygame.draw.rect(gameDisplay, color, 
+            (room.x * (room_width + margin) + margin/2,
+             room.y * (room_height + margin) + margin/2,
+             room_size,
+             room_size))
 
+def user_input(dungeon):
+    global currentRoom
+    global startRoom
+    global endRoom
+
+    print("up|down|left|right")
+    print("talisman")
+    print("")
+
+    choise = input()
+
+    currentRoom.isPlayer = False
+    if choise == "up":
+        if currentRoom.y - 1 >= 0:
+            currentRoom = dungeon.getRoom(currentRoom.x, currentRoom.y - 1)
+    elif choise == "down":
+        if currentRoom.y + 1 < dungeon.height:
+            currentRoom = dungeon.getRoom(currentRoom.x, currentRoom.y + 1)
+    elif choise == "left":
+        if currentRoom.x - 1 >= 0:
+            currentRoom = dungeon.getRoom(currentRoom.x - 1, currentRoom.y)
+    elif choise == "right":
+        if currentRoom.x + 1 < dungeon.width:
+            currentRoom = dungeon.getRoom(currentRoom.x + 1, currentRoom.y)
+    elif choise == "talisman":
+        rooms = dungeon.bfs(currentRoom, endRoom)
+        for room in rooms:
+            print(room)
+        print("{} steps left till the exit!".format(len(rooms) - 1))
+    currentRoom.isPlayer = True
+    
+    print("")
+    print("")
+
+if __name__ == '__main__':
+    dungeon = Dungeon()
+
+    rooms_x = int(input("Room width: "))
+    rooms_y = int(input("Room height: "))
+
+    margin = rooms_x * 10
+    room_width = (800 / rooms_x) - (margin)
+    room_height = (800 / rooms_y) - (margin)
+    room_size = min([200, room_width, room_height])
+
+    dungeon.generateRooms(rooms_x, rooms_y)
+    (start, end) = dungeon.generateExits()
+    start.isStart = True
+    end.isEnd = True
+
+    currentRoom = start
+    startRoom = start
+    endRoom = end
 
     while True:
         for event in pygame.event.get():
@@ -91,5 +130,9 @@ if __name__ == '__main__':
                 pygame.quit()
                 quit()
 
+        render(dungeon)
         pygame.display.update()
+
+        user_input(dungeon)
+
 

@@ -6,6 +6,7 @@ class Room:
         self.isStart = False
         self.isEnd = False
         self.isVisited = False
+        self.isPlayer = False
 
         self.isRoute = False
 
