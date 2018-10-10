@@ -115,8 +115,7 @@ if __name__ == '__main__':
     room_height = (800 / rooms_y) - (margin)
     room_size = min([200, room_width, room_height])
 
-    dungeon.generateRooms(rooms_x, rooms_y)
-    (start, end) = dungeon.generateExits()
+    (start, end) = dungeon.generate(rooms_x, rooms_y)
     start.isStart = True
     end.isEnd = True
 
