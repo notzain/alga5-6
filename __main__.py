@@ -27,13 +27,13 @@ endRoom = None
 
 def render(dungeon):
     for hallway in dungeon.hallways:
-        start_left = hallway.start.x * (room_width + margin) + margin/2
-        start_top = hallway.start.y * (room_height + margin) + margin/2
-        start_line = (start_left + room_size/2, start_top + room_size/2)
+        start_x = hallway.start.x * (room_width + margin) + margin/2
+        start_y = hallway.start.y * (room_height + margin) + margin/2
+        start_line = (start_x + room_size/2, start_y + room_size/2)
 
-        end_left = hallway.end.x * (room_width + margin) + margin/2
-        end_top = hallway.end.y * (room_height + margin) + margin/2
-        end_line = (end_left + room_size/2, end_top + room_size/2)
+        end_x = hallway.end.x * (room_width + margin) + margin/2
+        end_y = hallway.end.y * (room_height + margin) + margin/2
+        end_line = (end_x + room_size/2, end_y + room_size/2)
 
         pygame.draw.line(gameDisplay, (128, 128, 128), 
             start_line,
@@ -43,12 +43,12 @@ def render(dungeon):
 
         text = font.render(str(hallway.cost), True, white)
         textrect = text.get_rect()
-        if start_left == end_left:
-            textrect.centerx = start_line[0] + end_line[0]/2
-            textrect.centery = start_line[1]
+        if start_x == end_x:
+            textrect.centerx = start_line[0]
+            textrect.centery = (start_line[1] + end_line[1])/2
         else:
-            textrect.centerx = start_line[1] + end_line[1]/2
-            textrect.centery = start_line[0]
+            textrect.centerx = (start_line[0] + end_line[0])/2
+            textrect.centery = start_line[1]
 
         gameDisplay.blit(text, textrect)
 
