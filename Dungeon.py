@@ -91,23 +91,24 @@ class Dungeon:
         return (startRoom, endRoom)
 
 
+
     def bfs(self, startRoom, endRoom):
-        visited = {startRoom: None}
-        queue = deque([startRoom])
+        return startRoom.bfs(endRoom)
 
-        while queue:
-            room = queue.popleft()
-            if room == endRoom:
-                path = []
-                while room is not None:
-                    path.append(room)
-                    room = visited[room]
-                return path[::-1]
+    def mst(self):
+        edges = []
+        visited = []
+        visited.append(self.rooms[0])
 
-            for adjacent in room.adjacentRooms:
-                if not adjacent in visited:
-                    visited[adjacent] = room
-                    queue.append(adjacent)
+        hallways = list(self.hallways)
+        hallways.sort(key=lambda hall: hall.cost)
 
-        return None
-    
+        while len(visited) != len(self.rooms):
+            for room in visited:
+                for edge in hallways:
+                    if edge.start == room and edge.end not in visited:
+                        visited.append(edge.end)
+                        edges.append(edge)
+                        break
+        
+        return edges

@@ -35,7 +35,8 @@ def render(dungeon):
         end_y = hallway.end.y * (room_height + margin) + margin/2
         end_line = (end_x + room_size/2, end_y + room_size/2)
 
-        pygame.draw.line(gameDisplay, (128, 128, 128), 
+        pygame.draw.line(gameDisplay, 
+            white if hallway.isCollapsed else red,
             start_line,
             end_line,
             5
@@ -43,12 +44,14 @@ def render(dungeon):
 
         text = font.render(str(hallway.cost), True, white)
         textrect = text.get_rect()
+        # horizontal line
         if start_x == end_x:
-            textrect.centerx = start_line[0]
+            textrect.centerx = start_line[0] + 10
             textrect.centery = (start_line[1] + end_line[1])/2
+        # vertical line
         else:
             textrect.centerx = (start_line[0] + end_line[0])/2
-            textrect.centery = start_line[1]
+            textrect.centery = start_line[1] + 10
 
         gameDisplay.blit(text, textrect)
 
@@ -56,6 +59,8 @@ def render(dungeon):
     for room in dungeon.rooms:
         color = None
         if room.isPlayer:
+            color = red
+        elif room.isRoute:
             color = red
         elif room.isEnd:
             color = green
@@ -99,6 +104,12 @@ def user_input(dungeon):
         for room in rooms:
             print(room)
         print("{} steps left till the exit!".format(len(rooms) - 1))
+    elif choise == "boom":
+        mst = dungeon.mst()
+        for edge in mst:
+            edge.isCollapsed = True
+
+    
     currentRoom.isPlayer = True
     
     print("")
