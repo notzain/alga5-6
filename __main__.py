@@ -36,7 +36,7 @@ def render(dungeon):
         end_line = (end_x + room_size/2, end_y + room_size/2)
 
         pygame.draw.line(gameDisplay, 
-            white if hallway.isCollapsed else red,
+            red if hallway.isCollapsed else white,
             start_line,
             end_line,
             5
@@ -106,8 +106,9 @@ def user_input(dungeon):
         print("{} steps left till the exit!".format(len(rooms) - 1))
     elif choise == "boom":
         mst = dungeon.mst()
-        for edge in mst:
-            edge.isCollapsed = True
+        collapsedHalls = set(dungeon.hallways).difference(set(mst))
+        for hall in collapsedHalls:
+            hall.isCollapsed = True
 
     
     currentRoom.isPlayer = True

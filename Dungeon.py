@@ -104,8 +104,14 @@ class Dungeon:
         hallways.sort(key=lambda hall: hall.cost)
 
         while len(visited) != len(self.rooms):
+            # Iterate over visited rooms
             for room in visited:
+                # Look for lowest cost edge ...
                 for edge in hallways:
+                    # ... that contains the visited room
+                    # if the neighbour has not been visited yet,
+                    # append it to the list to visit
+                    # and save this edge
                     if edge.start == room and edge.end not in visited:
                         visited.append(edge.end)
                         edges.append(edge)
