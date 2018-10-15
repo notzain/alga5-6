@@ -61,4 +61,3 @@ class Room:
                     return True
                 
         return False
-

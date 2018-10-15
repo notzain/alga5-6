@@ -118,3 +118,48 @@ class Dungeon:
                         break
         
         return edges
+
+    def dijkstra(self, startRoom, endRoom):
+        #               startroom : (prevRoom, cost)
+        shortest_path = {startRoom: (None, 0)}
+        current_room = startRoom
+        visited = set()
+
+        while current_room != endRoom:
+            visited.add(current_room)
+            destinations = [hall for hall in self.hallways if hall.start == current_room]
+            current_cost = shortest_path[current_room][1]
+
+            for hall in destinations:
+                cost = hall.cost + current_cost
+                next_room = hall.end
+                if next_room not in shortest_path:
+                    shortest_path[next_room] = (current_room, cost)
+                else:
+                    shortest_cost = shortest_path[next_room][1]
+                    if shortest_cost > cost:
+                        shortest_path[next_room] = (current_room, cost)
+            
+            next_connections = {room: shortest_path[room] for room in shortest_path if room not in visited}
+            if not next_connections:
+                for k,v in shortest_path.items():
+                    print("shortest paths:")
+                    print("{} - {}".format(k,v))
+
+                print("")
+
+                for obj in visited:
+                    print("visited:")
+                    print(obj)
+                return []
+
+            current_room = min(next_connections, key=lambda room: next_connections[room][1])
+
+        path = []
+        while current_room is not None:
+            path.append(current_room)
+            next_room = shortest_path[current_room][0]
+            current_room = next_room
+
+        return path
+                

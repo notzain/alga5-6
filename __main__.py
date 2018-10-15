@@ -58,14 +58,14 @@ def render(dungeon):
 
     for room in dungeon.rooms:
         color = None
-        if room.isPlayer:
-            color = red
-        elif room.isRoute:
-            color = red
-        elif room.isEnd:
+        if room.isEnd:
             color = green
         elif room.isStart:
             color = blue
+        elif room.isPlayer:
+            color = red
+        elif room.isRoute:
+            color = red
         else:
             color = white
 
@@ -109,6 +109,10 @@ def user_input(dungeon):
         collapsedHalls = set(dungeon.hallways).difference(set(mst))
         for hall in collapsedHalls:
             hall.isCollapsed = True
+    elif choise == "dijkstra":
+        path = dungeon.dijkstra(startRoom, endRoom)
+        for room in path:
+            room.isRoute = True
 
     
     currentRoom.isPlayer = True
