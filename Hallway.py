@@ -1,9 +1,9 @@
 from random import randint
 class Hallway:
-    def __init__(self, start, end):
+    def __init__(self, start, end, cost):
         self.start = start
         self.end = end
-        self.cost = randint(0,9)
+        self.cost = cost
 
         self.isCollapsed = False
 

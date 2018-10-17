@@ -2,11 +2,13 @@ from Room import Room
 from Hallway import Hallway
 from collections import deque
 from random import randint
+import queue
 
 class Dungeon:
     def __init__(self):
         self.rooms = []
         self.hallways = []
+        self.hallways_double = []
         self.width = 0
         self.height = 0
 
@@ -36,8 +38,14 @@ class Dungeon:
                     room.add_neighbours(
                         [adjacent]
                     )
+                    adjacent.add_neighbours(
+                        [room]
+                    )
 
-                    self.hallways.append(Hallway(room, adjacent))
+                    cost = randint(1,10)
+                    self.hallways.append(Hallway(room, adjacent, cost))
+                    self.hallways_double.append(Hallway(room, adjacent, cost))
+                    self.hallways_double.append(Hallway(adjacent, room, cost))
 
                 if y + 1 < self.height:
                     room = next(room 
@@ -49,30 +57,15 @@ class Dungeon:
                     room.add_neighbours(
                         [adjacent]
                     )
-
-                    self.hallways.append(Hallway(room, adjacent))
-
-                if x - 1 >= 0:
-                    room = next(room 
-                        for room in self.rooms if room.x == x and room.y == y)
-
-                    adjacent = next(room 
-                        for room in self.rooms if room.x == x - 1 and room.y == y)
-                    
-                    room.add_neighbours(
-                        [adjacent]
+                    adjacent.add_neighbours(
+                        [room]
                     )
 
-                if y - 1 >= 0:
-                    room = next(room 
-                        for room in self.rooms if room.x == x and room.y == y)
+                    cost = randint(1,10)
+                    self.hallways.append(Hallway(room, adjacent, cost))
+                    self.hallways_double.append(Hallway(room, adjacent, cost))
+                    self.hallways_double.append(Hallway(adjacent, room, cost))
 
-                    adjacent = next(room 
-                        for room in self.rooms if room.x == x  and room.y == y - 1)
-                    
-                    room.add_neighbours(
-                        [adjacent]
-                    )
 
     def getRoom(self, x, y):
         return next(room
@@ -89,8 +82,6 @@ class Dungeon:
             for room in self.rooms if room.x == endx and room.y == endy)
 
         return (startRoom, endRoom)
-
-
 
     def bfs(self, startRoom, endRoom):
         return startRoom.bfs(endRoom)
@@ -120,46 +111,39 @@ class Dungeon:
         return edges
 
     def dijkstra(self, startRoom, endRoom):
-        #               startroom : (prevRoom, cost)
-        shortest_path = {startRoom: (None, 0)}
-        current_room = startRoom
-        visited = set()
+        inf = float('inf')
 
-        while current_room != endRoom:
-            visited.add(current_room)
-            destinations = [hall for hall in self.hallways if hall.start == current_room]
-            current_cost = shortest_path[current_room][1]
+        unvisited = set(self.rooms)
+        prev_rooms = {room: None for room in self.rooms}
+        room_costs = {}
+        for room in self.rooms:
+                room_costs[room] = inf
+        room_costs[startRoom] = 0
 
-            for hall in destinations:
-                cost = hall.cost + current_cost
-                next_room = hall.end
-                if next_room not in shortest_path:
-                    shortest_path[next_room] = (current_room, cost)
-                else:
-                    shortest_cost = shortest_path[next_room][1]
-                    if shortest_cost > cost:
-                        shortest_path[next_room] = (current_room, cost)
-            
-            next_connections = {room: shortest_path[room] for room in shortest_path if room not in visited}
-            if not next_connections:
-                for k,v in shortest_path.items():
-                    print("shortest paths:")
-                    print("{} - {}".format(k,v))
+        while len(unvisited) != 0:
+            current_room = min(unvisited,
+                key=lambda room: room_costs[room])
+            unvisited.remove(current_room)
 
-                print("")
+            if room_costs[current_room] == inf:
+                break
 
-                for obj in visited:
-                    print("visited:")
-                    print(obj)
-                return []
+            for neighbour in current_room.adjacentRooms:
+                hall = next(hall 
+                    for hall in self.hallways_double if hall.start == current_room and hall.end == neighbour)
+                alt_cost = hall.cost + room_costs[current_room]
 
-            current_room = min(next_connections, key=lambda room: next_connections[room][1])
+                if room_costs[neighbour] > alt_cost:
+                    room_costs[neighbour] = alt_cost
+                    prev_rooms[neighbour] = current_room
+        
+        path, current_room = deque(), endRoom
+        while prev_rooms[current_room] is not None:
+            path.appendleft(current_room)
+            current_room = prev_rooms[current_room]
 
-        path = []
-        while current_room is not None:
-            path.append(current_room)
-            next_room = shortest_path[current_room][0]
-            current_room = next_room
-
+        if path:
+            path.appendleft(current_room)
         return path
-                
+
+

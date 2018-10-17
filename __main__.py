@@ -24,8 +24,10 @@ margin = None
 currentRoom = None
 startRoom = None
 endRoom = None
+shortestPath = []
 
 def render(dungeon):
+    gameDisplay.fill(black)
     for hallway in dungeon.hallways:
         start_x = hallway.start.x * (room_width + margin) + margin/2
         start_y = hallway.start.y * (room_height + margin) + margin/2
@@ -79,6 +81,7 @@ def user_input(dungeon):
     global currentRoom
     global startRoom
     global endRoom
+    global shortestPath
 
     print("up|down|left|right")
     print("talisman")
@@ -110,15 +113,38 @@ def user_input(dungeon):
         for hall in collapsedHalls:
             hall.isCollapsed = True
     elif choise == "dijkstra":
-        path = dungeon.dijkstra(startRoom, endRoom)
-        for room in path:
+        shortestPath = dungeon.dijkstra(startRoom, endRoom)
+        for room in shortestPath:
             room.isRoute = True
+    elif choise == "reset":
+        for room in dungeon.rooms:
+            room.isRoute = False
+        dungeon.hallways.clear()
+        dungeon.hallways_double.clear()
+        dungeon.generateHallways()
+    elif choise == "hard":
+        for room in dungeon.rooms:
+            room.isRoute = False
 
-    
+        for i in range(len(shortestPath) - 1):
+            hall = next((hall
+                for hall in dungeon.hallways if hall.start == shortestPath[i] and hall.end == shortestPath[i+1]), None)
+            if hall is not None:
+                hall.cost = 10
+            hall = next((hall
+                for hall in dungeon.hallways if hall.start == shortestPath[i + 1] and hall.end == shortestPath[i]), None)
+            if hall is not None:
+                hall.cost = 10
+            hall = next((hall
+                for hall in dungeon.hallways_double if hall.start == shortestPath[i] and hall.end == shortestPath[i+1]), None)
+            if hall is not None:
+                hall.cost = 10
+            hall = next((hall
+                for hall in dungeon.hallways_double if hall.start == shortestPath[i + 1] and hall.end == shortestPath[i]), None)
+            if hall is not None:
+                hall.cost = 10
+
     currentRoom.isPlayer = True
-    
-    print("")
-    print("")
 
 if __name__ == '__main__':
     dungeon = Dungeon()
