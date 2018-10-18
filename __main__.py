@@ -8,10 +8,12 @@ font = pygame.font.Font(None, 24)
 
 white = (255, 255, 255)
 black = (0, 0, 0)
+gray = (128, 128, 128)
 
 red = (255, 0, 0)
 green = (0, 255, 0)
 blue = (0, 0, 255)
+orange = (255, 165, 0)
 
 gameDisplay = pygame.display.set_mode((800, 800))
 gameDisplay.fill(black)
@@ -65,9 +67,11 @@ def render(dungeon):
         elif room.isStart:
             color = blue
         elif room.isPlayer:
-            color = red
+            color = orange
         elif room.isRoute:
             color = red
+        elif room.isVisited:
+            color = gray
         else:
             color = white
 
@@ -84,7 +88,10 @@ def user_input(dungeon):
     global shortestPath
 
     print("up|down|left|right")
-    print("talisman")
+    print("talisman (bfs): # rooms till exit")
+    print("grenade (mst): collapse hallways")
+    print("compass (dijkstra): find shortest path to exit")
+    print("")
     print("")
 
     choise = input()
@@ -104,16 +111,16 @@ def user_input(dungeon):
             currentRoom = dungeon.getRoom(currentRoom.x + 1, currentRoom.y)
     elif choise == "talisman":
         rooms = dungeon.bfs(currentRoom, endRoom)
-        for room in rooms:
-            print(room)
         print("{} steps left till the exit!".format(len(rooms) - 1))
-    elif choise == "boom":
+        print("")
+        print("")
+    elif choise == "grenade":
         mst = dungeon.mst()
         collapsedHalls = set(dungeon.hallways).difference(set(mst))
         for hall in collapsedHalls:
             hall.isCollapsed = True
-    elif choise == "dijkstra":
-        shortestPath = dungeon.dijkstra(startRoom, endRoom)
+    elif choise == "compass":
+        shortestPath = dungeon.dijkstra(currentRoom, endRoom)
         for room in shortestPath:
             room.isRoute = True
     elif choise == "reset":
@@ -144,6 +151,7 @@ def user_input(dungeon):
             if hall is not None:
                 hall.cost = 10
 
+    currentRoom.isVisited = True
     currentRoom.isPlayer = True
 
 if __name__ == '__main__':
